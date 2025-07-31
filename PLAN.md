@@ -16,7 +16,7 @@ The TRMNL firmware uses a well-structured hardware abstraction system:
 #### 1.1 Add PlatformIO Environment ✅
 
 **File:** `platformio.ini`
-**Action:** Added new environment `firebeetle_esp32` for FireBeetle ESP32
+**Action:** Added new environment `dfrobot_firebeetle2_esp32e` for FireBeetle ESP32
 
 #### 1.2 Define Hardware Configuration ✅
 
@@ -43,7 +43,7 @@ Based on provided pin configuration:
 
 ```cpp
 #elif defined(BOARD_FIREBEETLE_ESP32)
-#define DEVICE_MODEL "firebeetle_esp32"
+#define DEVICE_MODEL "dfrobot_firebeetle2_esp32e"
 #define PIN_INTERRUPT 27  // Built-in button on FireBeetle ESP32
 #define FAKE_BATTERY_VOLTAGE
 ```
@@ -135,7 +135,7 @@ Based on provided pin configuration:
 
 ## Implementation Files to Modify
 
-- `platformio.ini` - Add `firebeetle_esp32` environment
+- `platformio.ini` - Add `dfrobot_firebeetle2_esp32e` environment
 - `DEV_Config.h` - Add pin definitions for `BOARD_FIREBEETLE_ESP32`
 - `config.h` - Add device model and interrupt pin
 - `README.md` - Update supported hardware documentation
