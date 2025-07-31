@@ -12,11 +12,13 @@
 // Board-specific display definitions for optimal hardware compatibility
 #if defined(BOARD_FIREBEETLE_ESP32)
     // FireBeetle ESP32 with Waveshare 7.5" e-Paper HAT
-    // Using Waveshare-specific display definitions (EP75R_800x480) for optimal compatibility
-    // EP75R_800x480 is specifically designed for Waveshare 800x480 displays and supports
-    // both black/white and 3-color modes, providing better compatibility than generic EP75_800x480
-    #define ONE_BIT_PANEL EP75R_800x480    // Waveshare 800x480 (supports both B/W and 3-color)
-    #define TWO_BIT_PANEL EP75_800x480_4GRAY_OLD  // Fallback for grayscale if needed
+    // Using standard EP75_800x480 which has correct dimensions and initialization
+    // This works with most 800x480 e-paper displays including Waveshare panels
+    // 
+    // Note: EP75R_800x480 is for 3-color (B/W/R) displays and causes dimension issues
+    // EP426_800x480 may have initialization issues with some Waveshare panels
+    #define ONE_BIT_PANEL EP75_800x480     // Standard 800x480 B/W (UC81xx chip)
+    #define TWO_BIT_PANEL EP75_800x480_4GRAY_OLD  // Standard 800x480 in grayscale mode
 #else
     // Default configuration for TRMNL and other boards using Good Display panels
     #define ONE_BIT_PANEL EP75_800x480     // GDEY075T7
@@ -54,7 +56,7 @@ void display_init(void)
     // FireBeetle ESP32 specific initialization and validation
     #if defined(BOARD_FIREBEETLE_ESP32)
         Log_info("FireBeetle ESP32 with Waveshare 7.5\" HAT detected");
-        Log_info("Display type: EP75R_800x480 (Waveshare 800x480)");
+        Log_info("Display type: EP75_800x480 (Standard B/W UC81xx)");
         Log_info("SPI Pins: SCK=%d, MOSI=%d, CS=%d, DC=%d, RST=%d, BUSY=%d", 
                  EPD_SCK_PIN, EPD_MOSI_PIN, EPD_CS_PIN, EPD_DC_PIN, EPD_RST_PIN, EPD_BUSY_PIN);
         
@@ -68,6 +70,12 @@ void display_init(void)
         } else {
             Log_warning("Display dimensions unexpected: expected 800x480, got %dx%d", width, height);
         }
+        
+        // Allocate display buffer for FireBeetle ESP32 to prevent fillScreen hanging
+        Log_info("Allocating display buffer...");
+        bbep.allocBuffer(false);
+        Log_info("Display buffer allocated successfully");
+        
     #else
         Log_info("Using default display configuration");
     #endif
@@ -966,7 +974,7 @@ bool display_test_initialization(void)
         
         // Test 3: Verify display panel type
         #ifdef ONE_BIT_PANEL
-            Log_info("✓ Display panel type: EP75R_800x480 (Waveshare optimized)");
+            Log_info("✓ Display panel type: EP75_800x480 (Standard B/W UC81xx)");
         #else
             Log_warning("! Display panel type not properly configured");
             return false;
@@ -974,15 +982,32 @@ bool display_test_initialization(void)
         
         // Test 4: Basic display operation test
         Log_info("✓ Performing basic display operation test...");
-        bbep.fillScreen(BBEP_WHITE);  // Clear screen
-        Log_info("✓ Screen clear operation completed");
         
-        // Test 5: Validate refresh capability
+        // First check if display is properly initialized
+        if (width == 0 || height == 0) {
+            Log_error("✗ Display not properly initialized - zero dimensions");
+            return false;
+        }
+        
+        // Add a small delay to ensure SPI is ready
+        delay(100);
+        
+        // Test screen clear operation (buffer should already be allocated in display_init)
+        Log_info("Attempting screen clear operation...");
+        bbep.fillScreen(BBEP_WHITE);  // Clear screen
+        Log_info("✓ Screen clear operation completed successfully");
+        
+        // Test 5: Validate refresh capability with timeout protection
         Log_info("✓ Testing display refresh capability...");
         #ifdef BB_EPAPER
-            // Test fast refresh (should work with EP75R_800x480)
+            // Test fast refresh (EP75_800x480 supports fast refresh)
+            Log_info("Starting fast refresh test...");
             bbep.refresh(REFRESH_FAST, true);
-            Log_info("✓ Fast refresh test completed");
+            Log_info("✓ Fast refresh test completed successfully");
+            
+            // Free the buffer after testing to prevent memory issues
+            bbep.freeBuffer();
+            Log_info("✓ Display buffer freed after testing");
         #endif
         
         Log_info("🎉 FireBeetle ESP32 + Waveshare 7.5\" HAT initialization test PASSED");
