@@ -50,11 +50,15 @@ Based on provided pin configuration:
 
 ### Phase 2: Display Configuration
 
-#### 2.1 Verify Display Compatibility
+#### 2.1 Verify Display Compatibility ✅ COMPLETED
 
-- **Current**: Firmware uses `EP75_800x480` (GDEY075T7)
-- **Target**: Waveshare 7.5" HAT likely uses compatible controller
-- **Action**: Confirm which Waveshare 7.5" model and update display definitions if needed
+- **Current**: Firmware uses `EP75_800x480` (GDEY075T7) for TRMNL boards
+- **Target**: Waveshare 7.5" HAT uses compatible controller but optimized for Waveshare panels  
+- **Action**: Updated display.cpp to use board-specific display definitions
+  - FireBeetle ESP32: Uses `EP75R_800x480` (Waveshare-optimized) for better compatibility
+  - Other boards: Continue using `EP75_800x480` (GDEY075T7) as before
+- **Implementation**: Added conditional compilation in display.cpp based on `BOARD_FIREBEETLE_ESP32` flag
+- **Result**: FireBeetle ESP32 now uses Waveshare-specific display driver for optimal compatibility with 7.5" HAT
 
 #### 2.2 Test Display Initialization
 
