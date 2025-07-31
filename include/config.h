@@ -75,6 +75,10 @@ enum WIFI_CONNECT_RETRY_TIME // Time to sleep before trying to connect to the Wi
 #define DEVICE_MODEL "seeed_esp32s3"
 #define PIN_INTERRUPT 0
 #define FAKE_BATTERY_VOLTAGE
+#elif defined(BOARD_FIREBEETLE_ESP32)
+#define DEVICE_MODEL "firebeetle_esp32"
+#define PIN_INTERRUPT 27  // Built-in button on FireBeetle ESP32
+#define FAKE_BATTERY_VOLTAGE
 #elif defined(BOARD_XIAO_EPAPER_DISPLAY)
 #define DEVICE_MODEL "xiao_epaper_display"
 #define PIN_INTERRUPT 5     //with silkscreen "KEY3"
